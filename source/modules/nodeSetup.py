@@ -38,7 +38,8 @@ def LoadLocal(projectName, node = 'node0', server = 0, gpu = -1):
 
 		projectPath = '"' + projectFolder + '\\' + projectName + '"'
 		
-		exeName = 'touchdesigner099.exe'
+		import os
+		exeName = 'TouchDesigner.exe' if os.path.exists(os.path.join(binFolder, 'TouchDesigner.exe')) else 'touchdesigner099.exe'
 
 		if gpu != -1:
 			arg0 = ' -gpuformonitor ' + str(gpu * 4) + ' '
@@ -82,7 +83,8 @@ def LoadRemote(client, userName, password, projectName, node = 'node0', server =
 	projectFolder = '"\\\\' + masterIP + '\\' + projectFolder 
 	projectPath = projectFolder + '\\' + projectName
 		
-	exeName = 'touchdesigner099.exe'
+	import os
+	exeName = 'TouchDesigner.exe' if os.path.exists(os.path.join(binFolder, 'TouchDesigner.exe')) else 'touchdesigner099.exe'
 	if gpu != -1:
 		arg0 = ' -gpuformonitor ' + str(gpu * 4) + ' '
 		launchCommand = exeName + '" ' + arg0
@@ -92,8 +94,8 @@ def LoadRemote(client, userName, password, projectName, node = 'node0', server =
 	launchCommand = '"'+ binFolder + '\\' + launchCommand + projectPath + '"'
 
 	psCommand = 'cmd /c set SERVER='+ str(server) +'& set GPU='+ str(gpu) +'& set NODE='+ str(node) +'& ' + launchCommand	
-	dirExe = rawStr(lmDir + '\externalTools\PSTools\PsExec.exe -d -i \\')
-	rDir = rawStr(lmDir + '\externalTools\PSTools')
+	dirExe = rawStr(lmDir + r'\externalTools\PSTools\PsExec.exe -d -i \\')
+	rDir = rawStr(lmDir + r'\externalTools\PSTools')
 	UserName = rawStr(userName)
 	pOpenCommand = dirExe + client +' -u '+ UserName +' -p '+ password +' '+ psCommand	
 	

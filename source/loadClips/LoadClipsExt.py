@@ -6,7 +6,7 @@ its attributes with capitalized names can be accessed directly through the
 extended component, e.g. op('yourComp').ExtensionMethod()
 """
 import tableFunc as TF
-import os
+import pickle
 
 class LoadClipsExt:
 	"""
@@ -15,8 +15,7 @@ class LoadClipsExt:
 	def __init__(self, ownerComp):
 		# The component to which this extension is attached
 		self.ownerComp = ownerComp
-		self.lm = op.LM
-		self.remote = self.lm.op('remote')
+		self.UDT_Out = op.CONTROL_OUT.op('reliableUDT')
 		self.LoadMovieComp = self.ownerComp.op('loadMovie')
 		self.LoadAudioComp = self.ownerComp.op('loadAudio')
 		self.DropFolderComp = self.ownerComp.op('dropFolder')
@@ -28,15 +27,15 @@ class LoadClipsExt:
 
 
 	def DropMedia(self, *args):
-		# print('DropMedia:', args)
+
 		mediaType = args[5]
 		bank = me.fetch('CUR_BANK')
-		clipUIPath = args[-1:][0]
+		clipUIPath = args[7]
 		clipUI = op(clipUIPath)
 
 		clipPathSplit = clipUIPath.split('/')
-		channel = clipPathSplit[-3:][0]
-		clip = clipPathSplit[-2:][0]
+		channel = clipPathSplit[-2:][0]
+		clip = clipPathSplit[-1:][0]
 
 		dataClipPath = me.fetch('CLIP_DATA') +'/'+ bank +'/'+ channel +'/'+ clip
 
@@ -121,10 +120,14 @@ class LoadClipsExt:
 				
 				sourceLane = op(sourceClip.parent().path)
 				sourceName = sourceClip.name
-				destClip = op.CLIP_DATA.op(me.fetch('CUR_BANK')).op(op(args[7]).parent(2).name).op(op(args[7]).parent().name)
+				#destClip = op(op(args[7]).fetch('DataClipPath'))
+				destClip = op.CLIP_DATA.op(me.fetch('CUR_BANK')).op(op(args[7]).parent().name).op(op(args[7]).name)
 
 				destLane = op(destClip.parent().path)
 				destName = destClip.name
+
+				#print(sourceClip)
+				#print(destClip)
 				
 				noClip = sourceLane.op('clip1001')
 
@@ -134,6 +137,7 @@ class LoadClipsExt:
 				#from 
 
 				if op(op.LM.fetch('KEYS'))['ctrl', 1] != '1':
+
 					sourceClip.destroy()
 					sourceLane.copy(noClip, name = sourceName)
 
@@ -144,7 +148,7 @@ class LoadClipsExt:
 			
 			self.LoadAudio(name, path,mediaType,bank,channel,clip)
 			
-		elif os.path.isdir(args[0]):
+		elif mediaType == '':
 			RootFolder = args[0]
 			rootFolder = self.DropFolderComp.op('rootFolder')
 			rootFolder.par.rootfolder = RootFolder
@@ -152,9 +156,8 @@ class LoadClipsExt:
 			self.DropFolderComp.op('dropFolder').run(bank, channel, clip, mediaType, delayFrames = 1)
 
 
-		if mediaType != '' and type(mediaType) != str:
+		if mediaType != '':
 			
-			print(mediaType)
 			selectUI = clipUI.op('select')
 			if selectUI.panel.state.val == 1:
 
@@ -180,10 +183,10 @@ class LoadClipsExt:
 		data['compPar'] = TF.SetToType(args[8])
 
 
-		self.remote.GetAttr(self.lm, 'RemoteLoadClip', data)
+		op.CONTROL_OUT.SendUDT('SetData', 'RemoteLoadClip', [data])
 
 	def LoadComp(self, *args, local = True):
-		print(args)
+
 		if local:
 			name = args[0]
 			path = args[1] #+'/'+ args[0]
@@ -201,8 +204,7 @@ class LoadClipsExt:
 			clip = args[0]['clip']
 
 
-		# print('name:', name, '\npath:', path, '\nmediaType:', mediaType, 
-		# 	'\nbank:', bank, '\nlane:', lane, '\nclip:', clip)
+		#print(args)
 
 		dataClipPath = me.fetch('CLIP_DATA') +'/'+ bank +'/'+ lane +'/'+ clip
 		thumbSelectPath = dataClipPath +'/config/thumb'
@@ -350,7 +352,7 @@ class LoadClipsExt:
 		clipComp = op(dataClipPath)
 
 
-		'''
+		r'''
 		#print('internalLoadClip:\n\t', args)
 		#check for master cropped clip load:
 		if re.match('master_*', name) or re.match('node*_*', name):

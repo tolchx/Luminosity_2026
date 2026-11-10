@@ -47,5 +47,5 @@ class Clip(object):
 		return self.ownerComp.fetch('ControlsSelected', tdu.Dependency(False))
 
 	@ControlsSelected.setter
-	def ControlsSeleced(self, value):
-		self.ownerComp.store('ControlsSeleced', tdu.Dependency(value))
+	def ControlsSelected(self, value):
+		self.ownerComp.store('ControlsSelected', tdu.Dependency(value))

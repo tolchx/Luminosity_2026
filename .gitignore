@@ -3,3 +3,10 @@ project/assets/LuminosityPreferences.txt
 
 project/Backup
 *.*.toe
+project/1.toe
+project/TDMCP.tox
+project/.tdmcp/
+project/.agents/
+project/skills/
+project/oauth_events.log
+.agents/

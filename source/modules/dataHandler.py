@@ -2,10 +2,13 @@ class SendData(object):
 
 	def __init__(self):
 
-		self.lm = op('/Luminosity')
-		self.remote = op('/Luminosity/remote')
+
+		self.DataOut = op(me.fetch('RELIABLE_UDT'))
 
 		return
+
+	def _sendCmd(self, msg):
+		op.CONTROL_OUT.SendCommand(msg)
 
 	def SendPar(self, comp, par):
 
@@ -18,9 +21,7 @@ class SendData(object):
 		msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
 		
 		
-		#self.DataOut.send(msg, terminator = '')
-
-		self.remote.SetPar(comp, par.name, par.eval())
+		self._sendCmd(msg)
 
 	def SendParTable(self, dat):
 
@@ -28,33 +29,58 @@ class SendData(object):
 
 		data = {r[0].val:tF.SetToType(r[1].val) for r in dat.rows()[1:]}	
 		args = [dat.path]		
-		#extOP = '/Luminosity'	
-		#className = 'SetData'		
-		#functionName = 'SetParTable' 
+		extOP = '/Luminosity'	
+		className = 'SetData'		
+		functionName = 'SetParTable' 
 			
-		#msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
+		msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
 		
 		
-		#self.DataOut.send(msg, terminator = '')
-
-		self.remote.GetAttr(self.lm, 'SetParTable', data, dat.path)
+		self._sendCmd(msg)
 
 	def SendParTablePar(self, dat, cells, prev):
 
 		extOP = me.fetch('ROOTPATH')	
 		className = 'SetData'		
 		functionName = 'SetParTablePar' 
-	
+			
+		prepend = extOP +'::'+ className +'::'+ functionName +'::'
+		
+		
 		
 		for c in cells:
-
-			self.remote.GetAttr(self.lm, 'SetParTablePar', c.val, dat.path, c.row, c.col)
+			msg = prepend + c.val +'::'+ str([dat.path, c.row, c.col])
+			self._sendCmd(msg)
 
 	def SendDAT(self, dat):
 
-		data = dat.text	
+		import tableFunc as tF
 
-		self.remote.GetAttr(self.lm, 'SetDAT', data, dat.path)
+		data = dat.text	
+		args = [dat.path]		
+		extOP = '/Luminosity'	
+		className = 'SetData'		
+		functionName = 'SetDAT' 
+			
+		msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
+		
+		
+		self._sendCmd(msg)
+
+	def SendTableRow(self, dat, cells, prev):
+
+		extOP = me.fetch('ROOTPATH')	
+		className = 'SetData'		
+		functionName = 'SetTableRow' 
+			
+		prepend = extOP +'::'+ className +'::'+ functionName +'::'
+		
+		
+		
+		for c in cells:
+			msg = prepend + c.val +'::'+ str([dat.path, c.row, c.col])
+			self._sendCmd(msg)
+
 
 	def SendStorageKey(self, value, name, path):
 
@@ -65,47 +91,62 @@ class SendData(object):
 		functionName = 'SetStorageKey'
 		prepend = extOP +'::'+ className +'::'+ functionName +'::'
 
-		self.remote.GetAttr(self.lm, 'SetStorageKey', value, name, path)
+		
+
+		msg = prepend + str(value) +'::'+ str([name, path])
+		self._sendCmd(msg)	
 
 	def SendTDControl(self, value, functionName):
+			
+		extOP = me.fetch('ROOTPATH')
+		className = 'TdControl'	
+		data = value
+		args = ''
+		msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
 
-		self.remote.GetAttr(self.lm, functionName, value)
+		
+		self._sendCmd(msg)
 
 	def SendCue(self, cue):
-	
-		self.remote.GetAttr(self.lm, 'SetCue', cue)
+
+		data = cue	
+		args = []		
+		extOP = '/Luminosity'	
+		className = 'SetData'		
+		functionName = 'SetCue' 
+			
+		msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
+		
+		
+		self._sendCmd(msg)
 
 	def SendRecallPreset(self, preset, path):
 		#print(preset, path)
 
 		if path != '/Luminosity/database/cuePlayer/cueList/plugin/presets':
 
-			self.remote.GetAttr(self.lm, 'SetRecallPreset', preset, path)
+			data = preset
+			args = [path]		
+			extOP = '/Luminosity'	
+			className = 'SetData'		
+			functionName = 'SetRecallPreset' 
+				
+			msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
+			
+			
+			self._sendCmd(msg)
 
 
 class SetData(object):
 
-	def __init__(self, ownerComp):
-		self.ownerComp = ownerComp
-		self.remote = ownerComp.op('remote')
-		self.setMapData = setMapData(ownerComp)
+	def __init__(self):
+		return
 		
-	def Save(self, node):
-
-		#print('Save')
-		if node == me.fetch('NODE'):
-			project.save()
-
-	def Quit(self, node):
-
-		#print('Quit')
-		if node == me.fetch('NODE'):
-			project.quit(force = True)
-
-	def Realtime(self, active):
-
-		realTime(active)
-
+	def Smpl(self, data, *args):
+	
+		#print(args)
+		#print(data)
+		pass
 
 	def SetParTable(self, data, tablePath):
 	
@@ -176,108 +217,10 @@ class SetData(object):
 		op.LOAD_CLIPS.RemoteLoadClip(data)
 
 
-	def SetMapData(self, server, gpu, path, name, mapData):
-
-		gpuPath = self.ownerComp.fetch('GPU_PATH')
-	
-		if str(self.ownerComp.fetch('SERVER')) == server and str(self.ownerComp.fetch('GPU')) == gpu:		
-				
-			if path == 'gpu':
-				settingsPath = gpuPath + '/settings'
-				self.setMapData.gpu(settingsPath, name, mapData)
-				
-			else:	
-				mapDataPath = op(gpuPath +'/'+ path +'/mapData')
-				
-				#if name in dir(setMapData):
-				getattr(self.setMapData, name)(mapDataPath, path, name, mapData)
-
-
-class setMapData:
-	def __init__(self, ownerComp):
-		self.ownerComp = ownerComp
-
-	def gpu(self, path, name, value):
-		gpuPath = self.ownerComp.fetch('GPU_PATH')
-		settings = op(path)
-		settings[name, 1] = value
-		
-	def setup(self, path, output, name, value):
-		settings = self.ownerComp.fetch('GPU_PATH') +'/'+ output +'/settings'
-		for key,val in value.items():
-			op(settings)[key, 1] = val
-
-	def camSchSetupData(self, path, output, name, value):
-		camSch = op(self.ownerComp.fetch('CAMSCHNAPPR'))
-		mapData = op(path)
-		mapData[name, 1] = value	
-		camSch.op('sndRcvRcl/receiveSetupData').run(value)
-
-	def camSchCalData(self, path, output, name, value):
-		camSch = op(self.ownerComp.fetch('CAMSCHNAPPR'))
-		mapData = op(path)
-		mapData[name, 1] = value
-		camSch.op('sndRcvRcl/receiveCalData').run(value)
-
-	def camSchRecall(self, path, output, name, value):
-		if value == 1:
-			camSch = op(self.ownerComp.fetch('CAMSCHNAPPR'))
-			mapData = op(path)
-			mapData[name, 1] = value
-			calData = eval(mapData['camSchCalData',1].val)
-			setupData = eval(mapData['camSchSetupData',1].val)
-			
-			setup = eval(mapData['setup', 1].val)
-			mapPrimary = str(setup['mapPrimary'])
-			matrix = mapData.parent().op('matrix' + mapPrimary)
-			exports = mapData.parent().op('exports' + mapPrimary)
-		
-			camSch.store('StoreDataOP', matrix.path)
-			camSch.store('SendDataOP', mapData.path)
-			camSch.store('MatrixPath', matrix.path)
-			camSch.store('ExportsPath', exports.path)
-			
-			camSch.op('sndRcvRcl/receiveSetupData').run(setupData, delayFrames = 1)
-			camSch.op('sndRcvRcl/receiveCalData').run(calData, delayFrames = 2)
-			camSch.op('sndRcvRcl/remoteRecallInit').run(calData, delayFrames = 3)
-		
-	def edgeBlendSettings(self, path, output, name, value):
-		op(path)[name, 1] = value
-		output = op(self.ownerComp.fetch('GPU_PATH') +'/'+ output)
-		parms = output.op('edgeBlendParameters')
-		settings = output.op('edgeBlendSettings')
-
-		setup = value['setup']
-		for key,val in setup.items():
-			parms[key, 1] = val
-
-		value.pop('setup')
-
-		for side,par in value.items():
-			for key,v in par.items():
-				settings[key, side] = v 
-
-
-
-	def warpData(self, path, output, name, value):
-		op(path)[name, 1] = value	
-		warpOP = op(self.ownerComp.fetch('WARP'))
-		warp = warpOP.mod.remoteWarp.Warp()
-		warp.remoteControl(value, self.ownerComp.fetch('OUTPUTS') +'/'+ output +'/map2d/mapView')
-
-		
-	def maskData(self, path, output, name, value):
-		op(path)[name, 1] = value
-
-	def auxData(self, path, output, name, value):
-		op(path)[name, 1] = value						
-
-
 class Load(object):
 
 	def __init__(self):
-		self.lm = op('/Luminosity')
-		self.remote = op('/Luminosity/remote')
+		return
 
 	def LoadInsert(self, path, dataSlotPath):
 
@@ -376,8 +319,14 @@ class Load(object):
 		#print(path, dataSlotPath)
 		
 		if me.fetch('NODE') == 'master' and op.DATABASE.fetch('REMOTE_MODE') != 0:
+			extOP = me.fetch('ROOTPATH')
+			className = 'Load'	
+			functionName = 'LoadEffect' 
+			data = path
+			args = [dataSlotPath]
+			msg = extOP +'::'+ className +'::'+ functionName +'::'+ str(data) +'::'+ str(args)
 
-			self.remote.GetAttr(self.lm, 'LoadEffect', path, dataSlotPath)
+			op.CONTROL_OUT.SendCommand(msg)
 		
 
 		slot = dataSlotPath[-1:]
