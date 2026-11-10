@@ -17,6 +17,7 @@ This fork (`tolchx/Luminosity_2026`) modernizes Keith Lostracco's **Luminosity v
   - Upgraded **16 external plugin `.tox` files** (`assets/components/effects/` & `assets/components/gens/`) from `glsl120` / `texture2D` / `texelFetchBuffer` / reserved `input` / legacy menus / broken expressions (`audioGLSL`, `audioGLSL2`, `feedback`, `fluid`, `geoKalide`, `kalide`, `mix1`, `strobe`, `stutter`, `audioCurves`, `audioGLSL`, `AudioSphere`, `cardioidCircles`, `reactionDiffusion`, `spherical`, `TruchetTiles`) to valid TD `2025.32460` GLSL `glsl430`.
 - **UI, Browser, PluginDesigner & Presets Fixes**:
   - Restored `parent.Gadget` parent shortcuts across legacy `camSchnappr` and `animationEditor` UI widgets and unbound 38 dead exports, plus `camSchnappr` `transform3` and `lookup2` fixes.
+  - Added **File → About** dialog (`aboutDialog` / `aboutWindow`) with original author credits (**Keith Lostracco**), collaborator & TD 2025 restoration info (**Tolch.x**), and direct web/repository buttons.
   - Guarded `browser/contents/external/folder{2..5}` against virtual `/Luminosity/...` paths during internal Effects/Generators browsing.
   - Added `parent().op('animation')` fallback and cleaned `Animationcomp` references in `PresetsExt.py` so preset banks initialize reliably.
 - **Python 3.11+ Bugfixes & TD 2025 Launchers**:
@@ -51,10 +52,13 @@ This fork (`tolchx/Luminosity_2026`) modernizes Keith Lostracco's **Luminosity v
 
 ## Contributors
 
-* **Keith Lostracco** (http://www.IntentDev.io)
-* **Peter Walker**
-* **Matthew Wachter**
-* **TD 2025.32460 Compatibility Fork**: [tolchx/Luminosity_2026](https://github.com/tolchx/Luminosity_2026)
+* **Keith Lostracco** — Original Author (http://www.IntentDev.io)
+* **Peter Walker** — Original Contributor
+* **Matthew Wachter** — Original Contributor
+* **Tolch.x** — Collaborator & TouchDesigner `2025.32460` Restoration
+  - [![Tolch.x Web](https://img.shields.io/badge/Web-tolchx.com-1f6feb?style=for-the-badge)](https://tolchx.com) [![GitHub Repo](https://img.shields.io/badge/GitHub-tolchx%2FLuminosity__2026-24292e?style=for-the-badge)](https://github.com/tolchx/Luminosity_2026)
+  - Website: https://tolchx.com
+  - Repository: https://github.com/tolchx/Luminosity_2026
 
 ## License
 
